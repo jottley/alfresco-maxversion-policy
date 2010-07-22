@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<project name="Alfresco AMP Build File" default="package-amp" basedir=".">
+	
+	<property file="amp-build.properties"/>
+
+	<property name="project.dir" value="."/>
+	<property name="build.dir" value="${project.dir}/build"/>
+	<property name="config.dir" value="${project.dir}/config"/>
+	<property name="sdk.dir" value="${user.home}/${sdk.path}"/>
+	<property name="jar.file" value="${build.dir}/lib/${lib.name}.jar"/>
+	<property name="amp.file" value="${build.dir}/dist/${amp.name}.amp"/>
+
+	<target name="mkdirs">
+		<mkdir dir="${build.dir}/dist" />
+		<mkdir dir="${build.dir}/lib" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}" includeemptydirs="true" />
+	</target>
+
+	<path id="class.path">
+		<dirset dir="${build.dir}" />
+		<fileset dir="${sdk.dir}/lib/" includes="**/*.jar"/>
+	</path>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}/classes" />
+		<javac classpathref="class.path" srcdir="${project.dir}/src" destdir="${build.dir}/classes" debug="${developer.mode}" target="1.5"/>
+		<copy todir="${build.dir}/classes">
+			<fileset dir="${project.dir}/src" excludes="**/*.java" includes="**/*.properties"/>
+		</copy>
+	</target>
+
+	<target name="package-jar" depends="compile">
+		<jar destfile="${jar.file}" >
+			<fileset dir="${build.dir}/classes" excludes="**/*Test*" includes="**/*.class,**/*.properties" />
+		</jar>
+	</target>
+
+	<target name="package-amp" depends="clean, mkdirs, package-jar" description="Package the Module" >
+		<zip destfile="${amp.file}" >
+			<fileset dir="${project.dir}/build" includes="lib/*.jar" />
+			<fileset dir="${project.dir}" includes="config/**/*.*,web/**/*.*" excludes="**/module.properties" />
+			<fileset dir="${project.dir}/config/" includes="module.properties" />
+		</zip>
+	</target>
+
+</project>

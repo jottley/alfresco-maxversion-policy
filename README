@@ -1,0 +1,18 @@
+Alfresco Max Version Policy
+
+Author: Jared Ottley (jared.ottley@alfresco.com)
+Date: 7/21/2010
+Version: 0.2
+
+Summary
+Alfresco Max Version Policy limits the number of versions that are created for a
+versioned node. The default value is set for 10 versions per node.  This can be 
+overridden by copying the maxversionpolicy-context.xml file into the extensions directory
+and changing the value of the maxVersion property.
+
+Install
+Alfresco Max Version Policy is delivered as an AMP.  Copy the AMP into the amps 
+directory and run the apply_amps.[sh|bat] script. Alfresco must not be running when you 
+apply the AMP.
+
+Currently only tested against 3.2.x
