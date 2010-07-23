@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
 /**
  * 
  * @author Jared Ottley
- *
+ * 
  */
 
 public class MaxVersionPolicy implements OnCreateVersionPolicy {
@@ -88,18 +88,23 @@ public class MaxVersionPolicy implements OnCreateVersionPolicy {
 		VersionHistory versionHistory = versionService
 				.getVersionHistory(nodeRef);
 
-		logger.debug("Current number of versions: "
-				+ versionHistory.getAllVersions().size());
-		logger.debug("least recent/root version: "
-				+ versionHistory.getRootVersion().getVersionLabel());
-
-		// If the current number of versions in the VersionHistory is greater
-		// than the maxVersions limit, remove the root/least recent version
-		if (versionHistory.getAllVersions().size() > maxVersions) {
-			logger.debug("Removing Version: "
+		if (versionHistory != null) {
+			logger.debug("Current number of versions: "
+					+ versionHistory.getAllVersions().size());
+			logger.debug("least recent/root version: "
 					+ versionHistory.getRootVersion().getVersionLabel());
-			versionService.deleteVersion(nodeRef, versionHistory
-					.getRootVersion());
+
+			// If the current number of versions in the VersionHistory is
+			// greater
+			// than the maxVersions limit, remove the root/least recent version
+			if (versionHistory.getAllVersions().size() > maxVersions) {
+				logger.debug("Removing Version: "
+						+ versionHistory.getRootVersion().getVersionLabel());
+				versionService.deleteVersion(nodeRef, versionHistory
+						.getRootVersion());
+			}
+		} else {
+			logger.debug("versionHistory does not exist");
 		}
 	}
 }
