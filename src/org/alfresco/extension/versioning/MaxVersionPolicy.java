@@ -39,7 +39,8 @@ import org.apache.log4j.Logger;
 
 /**
  * 
- * @author Jared Ottley
+ * @author Jared Ottley (jared.ottley@alfresco.com)
+ * @version 0.4
  * 
  */
 
