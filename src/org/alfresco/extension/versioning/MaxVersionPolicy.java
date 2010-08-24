@@ -82,8 +82,6 @@ public class MaxVersionPolicy implements AfterCreateVersionPolicy {
 
 	@Override
 	public void afterCreateVersion(NodeRef versionableNode, Version version) {
-		logger.debug("this is afterCreateVersion");
-
 		VersionHistory versionHistory = versionService
 				.getVersionHistory(versionableNode);
 
