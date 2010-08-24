@@ -24,16 +24,13 @@
  */
 package org.alfresco.extension.versioning;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
 import org.alfresco.repo.policy.PolicyComponent;
-import org.alfresco.repo.policy.PolicyScope;
 import org.alfresco.repo.policy.Behaviour.NotificationFrequency;
-import org.alfresco.repo.version.VersionServicePolicies.OnCreateVersionPolicy;
+import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.namespace.NamespaceService;
@@ -46,7 +43,7 @@ import org.apache.log4j.Logger;
  * 
  */
 
-public class MaxVersionPolicy implements OnCreateVersionPolicy {
+public class MaxVersionPolicy implements AfterCreateVersionPolicy {
 
 	private Logger logger = Logger.getLogger(MaxVersionPolicy.class);
 
@@ -56,7 +53,7 @@ public class MaxVersionPolicy implements OnCreateVersionPolicy {
 	// max number of versions per versioned node
 	private int maxVersions;
 
-	private Behaviour onCreateVersion;
+	private Behaviour afterCreateVersion;
 
 	public void setPolicyComponent(PolicyComponent policyComponent) {
 		this.policyComponent = policyComponent;
@@ -71,22 +68,23 @@ public class MaxVersionPolicy implements OnCreateVersionPolicy {
 	}
 
 	public void init() {
+
 		logger.debug("MaxVersions is set to: " + maxVersions);
 
-		this.onCreateVersion = new JavaBehaviour(this, "onCreateVersion",
+		this.afterCreateVersion = new JavaBehaviour(this, "afterCreateVersion",
 				NotificationFrequency.TRANSACTION_COMMIT);
 
 		this.policyComponent.bindClassBehaviour(QName.createQName(
-				NamespaceService.ALFRESCO_URI, "onCreateVersion"),
-				MaxVersionPolicy.class, this.onCreateVersion);
+				NamespaceService.ALFRESCO_URI, "afterCreateVersion"),
+				MaxVersionPolicy.class, this.afterCreateVersion);
 	}
 
 	@Override
-	public void onCreateVersion(QName classRef, NodeRef nodeRef,
-			Map<String, Serializable> versionProperties, PolicyScope nodeDetails) {
+	public void afterCreateVersion(NodeRef versionableNode, Version version) {
+		logger.debug("this is afterCreateVersion");
 
 		VersionHistory versionHistory = versionService
-				.getVersionHistory(nodeRef);
+				.getVersionHistory(versionableNode);
 
 		if (versionHistory != null) {
 			logger.debug("Current number of versions: "
@@ -100,11 +98,12 @@ public class MaxVersionPolicy implements OnCreateVersionPolicy {
 			if (versionHistory.getAllVersions().size() > maxVersions) {
 				logger.debug("Removing Version: "
 						+ versionHistory.getRootVersion().getVersionLabel());
-				versionService.deleteVersion(nodeRef, versionHistory
+				versionService.deleteVersion(versionableNode, versionHistory
 						.getRootVersion());
 			}
 		} else {
 			logger.debug("versionHistory does not exist");
 		}
+
 	}
 }
