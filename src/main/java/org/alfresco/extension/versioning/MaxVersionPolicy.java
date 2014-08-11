@@ -86,6 +86,13 @@ public class MaxVersionPolicy
     {
         VersionHistory versionHistory = versionService.getVersionHistory(versionableNode);
 
+        // If maxVersions is zero, consider policy to be disabled
+        if (maxVersions == 0)
+        {
+            logger.debug("maxVersions is set to zero, consider policy to be disabled");
+            return;
+        }
+
         if (versionHistory != null)
         {
             logger.debug("Current number of versions: " + versionHistory.getAllVersions().size());
@@ -93,10 +100,12 @@ public class MaxVersionPolicy
 
             // If the current number of versions in the VersionHistory is greater
             // than the maxVersions limit, remove the root/least recent version
-            if (versionHistory.getAllVersions().size() > maxVersions)
+            // (Remove all version in while cycle since we can have legacy nodes with long history created before the policy was applied.)
+            while (versionHistory.getAllVersions().size() > maxVersions)
             {
                 logger.debug("Removing Version: " + versionHistory.getRootVersion().getVersionLabel());
                 versionService.deleteVersion(versionableNode, versionHistory.getRootVersion());
+                versionHistory = versionService.getVersionHistory(versionableNode);
             }
         }
         else
