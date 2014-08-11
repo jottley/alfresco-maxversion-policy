@@ -86,6 +86,13 @@ public class MaxVersionPolicy
     {
         VersionHistory versionHistory = versionService.getVersionHistory(versionableNode);
 
+        // If maxVersions is zero, consider policy to be disabled
+        if (maxVersions == 0)
+        {
+            logger.debug("maxVersions is set to zero, consider policy to be disabled");
+            return;
+        }
+
         if (versionHistory != null)
         {
             logger.debug("Current number of versions: " + versionHistory.getAllVersions().size());
