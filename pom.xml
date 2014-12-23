@@ -3,8 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.alfresco.extension</groupId>
 	<artifactId>max-version-policy-${project.version}</artifactId>
-	<version>0.0.7-SNAPSHOT</version>
+	<version>0.0.7-1</version>
 	<packaging>amp</packaging>
+
+	<properties>
+		<alfresco.version>4.2.d</alfresco.version>
+	</properties>
 
 
 	<parent>
@@ -27,7 +31,7 @@
 		<dependency>
 			<groupId>org.alfresco</groupId>
 			<artifactId>alfresco-repository</artifactId>
-			<version>4.2.d</version>
+			<version>${alfresco.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
