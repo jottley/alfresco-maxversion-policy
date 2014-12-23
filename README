@@ -1,8 +1,8 @@
 Alfresco Max Version Policy
 
 Author: Jared Ottley (jared.ottley@alfresco.com)
-Date: 08/25/2014
-Version: 0.0.6
+Date: 12/23/2014
+Version: 0.0.7-1
 
 Summary
 Alfresco Max Version Policy limits the number of versions that are created for a
@@ -14,7 +14,8 @@ Alfresco Max Version Policy is delivered as an AMP (https://github.com/jottley/a
 directory and run the apply_amps.[sh|bat] script. Alfresco must not be running when you 
 apply the AMP.
 
-Currently tested against 4.2
+Alfresco Minimum Version required: 4.2
+Alfresco Maximum Version required: 5.0
 
 Contributions
 Konst Sergeev <https://github.com/ksergeev> - Allow disabling the policy by setting maxVersions to zero
