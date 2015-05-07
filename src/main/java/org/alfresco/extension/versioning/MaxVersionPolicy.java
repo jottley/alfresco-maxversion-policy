@@ -119,6 +119,17 @@ public class MaxVersionPolicy
 
 	@Override
 	public void afterCreateVersion(NodeRef versionableNode, Version version) {
+		try {
+			doAfterCreateVersion(versionableNode, version);
+		} catch (Throwable e) {
+			// if any error occur: log the error and carry on (we should not
+			// block the creation of a new version just becouse ve fail in
+			// removing older ones)
+			logger.error("An error happen:", e);
+		}
+	}
+
+	public void doAfterCreateVersion(NodeRef versionableNode, Version version) {
 		// If maxVersions is zero, consider policy to be disabled
 		if (maxMajorVersions == 0 && maxMinorVersions == 0) {
 			logger.debug("maxMajorVersions and maxMinorVersions is set to zero, consider policy to be disabled");
@@ -151,7 +162,7 @@ public class MaxVersionPolicy
 						+ versionHistory.getAllVersions().size() + ") "
 						+ sb.toString());
 			}
-			
+
 			List<Version> majorVersions = new LinkedList<>();
 			List<Version> minorVersions = new LinkedList<>();
 
