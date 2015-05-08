@@ -138,57 +138,64 @@ public class MaxVersionPolicy
 
 		VersionHistory versionHistory = versionService
 				.getVersionHistory(versionableNode);
-
-		if (versionHistory != null) {
-
-			Collection<Version> versions = versionHistory.getAllVersions();
-			if (logger.isDebugEnabled()) {
-				if (versions.size() > 0) {
-					if (!versions.iterator().next()
-							.equals(versionHistory.getHeadVersion())) {
-						throw new IllegalStateException(
-								"The first version returned by versionHistory.getAllVersions() should be the latest.");
-					}
-				}
-				StringBuilder sb = new StringBuilder();
-				Iterator<Version> it = versions.iterator();
-				while (it.hasNext()) {
-					sb.append(it.next().getVersionLabel());
-					if (it.hasNext()) {
-						sb.append(", ");
-					}
-				}
-				logger.debug("Current versions: ("
-						+ versionHistory.getAllVersions().size() + ") "
-						+ sb.toString());
-			}
-
-			List<Version> majorVersions = new LinkedList<>();
-			List<Version> minorVersions = new LinkedList<>();
-
-			for (Version v : versions) {
-				switch (v.getVersionType()) {
-				case MAJOR:
-					majorVersions.add(v);
-					break;
-				case MINOR:
-					minorVersions.add(v);
-					break;
-				default:
-					throw new IllegalStateException(
-							"a version shoul be Major or Minor");
-				}
-			}
-
-			enforceMaxVersions(versionableNode, VersionType.MAJOR,
-					majorVersions, maxMajorVersions,
-					keepIntermediateMajorVersions);
-			enforceMaxVersions(versionableNode, VersionType.MINOR,
-					minorVersions, maxMinorVersions,
-					keepIntermediateMinorVersions);
-		} else {
-			logger.debug("versionHistory does not exist");
+		if (versionHistory == null) {
+			logger.warn("versionHistory does not exist");
+			return;
 		}
+
+		Collection<Version> versions = versionHistory.getAllVersions();
+		if (versions == null || versions.isEmpty()) {
+			logger.warn("versionHistory.getAllVersions() returned no versions");
+			return;
+		}
+		if (!versions.iterator().next().equals(versionHistory.getHeadVersion())) {
+			throw new IllegalStateException(
+					"The first version returned by versionHistory.getAllVersions() should be the latest.");
+		}
+		
+		if (logger.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			Iterator<Version> it = versions.iterator();
+			while (it.hasNext()) {
+				sb.append(it.next().getVersionLabel());
+				if (it.hasNext()) {
+					sb.append(", ");
+				}
+			}
+			logger.debug("Current versions: ("
+					+ versionHistory.getAllVersions().size() + ") "
+					+ sb.toString());
+		}
+
+		List<Version> majorVersions = new LinkedList<>();
+		List<Version> minorVersions = new LinkedList<>();
+
+		for (Version v : versions) {
+			if (v == null) {
+				continue;
+			}
+			VersionType type = v.getVersionType();
+			if(type == null) {
+				logger.error("getVersionType() returned null for a version (will be ignored and keept): " + v + "("+v.getVersionLabel()+")");
+				continue;
+			}
+			switch (type) {
+			case MAJOR:
+				majorVersions.add(v);
+				break;
+			case MINOR:
+				minorVersions.add(v);
+				break;
+			default:
+				throw new IllegalStateException(
+						"a version shoul be Major or Minor");
+			}
+		}
+
+		enforceMaxVersions(versionableNode, VersionType.MAJOR, majorVersions,
+				maxMajorVersions, keepIntermediateMajorVersions);
+		enforceMaxVersions(versionableNode, VersionType.MINOR, minorVersions,
+				maxMinorVersions, keepIntermediateMinorVersions);
 	}
 
 	private void enforceMaxVersions(NodeRef versionableNode,
