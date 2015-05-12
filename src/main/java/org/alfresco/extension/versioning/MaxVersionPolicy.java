@@ -30,10 +30,12 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.policy.Behaviour.NotificationFrequency;
 import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
 import org.alfresco.service.cmr.version.VersionType;
+import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -54,6 +56,8 @@ public class MaxVersionPolicy
 
 	private PolicyComponent policyComponent;
 	private VersionService versionService;
+	private NodeService nodeService;
+	private NamespacePrefixResolver namespacePrefixResolver;
 
 	// max number of versions per version node
 	private int maxMinorVersions;
@@ -61,17 +65,23 @@ public class MaxVersionPolicy
 	private int maxMajorVersions;
 	private int keepIntermediateMajorVersions;
 
-
-
     public void setPolicyComponent(PolicyComponent policyComponent)
     {
 		this.policyComponent = policyComponent;
 	}
 
-
     public void setVersionService(VersionService versionService)
     {
 		this.versionService = versionService;
+	}
+    
+    public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
+    
+    public void setNamespacePrefixResolver(
+			NamespacePrefixResolver namespacePrefixResolver) {
+		this.namespacePrefixResolver = namespacePrefixResolver;
 	}
 
 	public void setMaxMajorVersions(int maxMajorVersions) {
@@ -162,9 +172,11 @@ public class MaxVersionPolicy
 					sb.append(", ");
 				}
 			}
-			logger.debug("Current versions: ("
-					+ versionHistory.getAllVersions().size() + ") "
-					+ sb.toString());
+			logger.debug("Enforcing max versions for file '"
+					+ nodeService.getPath(versionableNode).toPrefixString(namespacePrefixResolver) + "'("
+					+ versionableNode + "): current versions: ("
+					+ versionHistory.getAllVersions().size() + ")["
+					+ sb.toString() + "]");
 		}
 
 		List<Version> majorVersions = new LinkedList<>();

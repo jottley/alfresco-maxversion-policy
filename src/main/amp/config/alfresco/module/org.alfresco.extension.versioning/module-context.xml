@@ -10,6 +10,12 @@
             <property name="versionService">
                 <ref bean="VersionService" />
             </property>
+            <property name="nodeService">
+                <ref bean="nodeService" />
+            </property>
+            <property name="namespacePrefixResolver">
+                <ref bean="namespaceService" />
+            </property>            
             <!-- The max number of versions per versioned node -->
             <property name="maxMinorVersions">
                 <value>${maxVersionPolicy.maxMinorVersions}</value>
