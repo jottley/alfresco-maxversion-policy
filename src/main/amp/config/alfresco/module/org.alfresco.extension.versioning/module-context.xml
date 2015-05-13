@@ -10,9 +10,24 @@
             <property name="versionService">
                 <ref bean="VersionService" />
             </property>
+            <property name="nodeService">
+                <ref bean="nodeService" />
+            </property>
+            <property name="namespacePrefixResolver">
+                <ref bean="namespaceService" />
+            </property>            
             <!-- The max number of versions per versioned node -->
-            <property name="maxVersions">
-                <value>${maxVersions}</value>
+            <property name="maxMinorVersions">
+                <value>${maxVersionPolicy.maxMinorVersions}</value>
+            </property>
+            <property name="keepIntermediateMinorVersions">
+                <value>${maxVersionPolicy.keepIntermediateMinorVersions}</value>
+            </property>
+            <property name="maxMajorVersions">
+                <value>${maxVersionPolicy.maxMajorVersions}</value>
+            </property>
+            <property name="keepIntermediateMajorVersions">
+                <value>${maxVersionPolicy.keepIntermediateMajorVersions}</value>
             </property>
         </bean>
     

@@ -18,6 +18,11 @@
 
 package org.alfresco.extension.versioning;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 import org.alfresco.repo.policy.Behaviour;
 import org.alfresco.repo.policy.JavaBehaviour;
@@ -25,9 +30,12 @@ import org.alfresco.repo.policy.PolicyComponent;
 import org.alfresco.repo.policy.Behaviour.NotificationFrequency;
 import org.alfresco.repo.version.VersionServicePolicies.AfterCreateVersionPolicy;
 import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.cmr.version.Version;
 import org.alfresco.service.cmr.version.VersionHistory;
 import org.alfresco.service.cmr.version.VersionService;
+import org.alfresco.service.cmr.version.VersionType;
+import org.alfresco.service.namespace.NamespacePrefixResolver;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 import org.apache.log4j.Logger;
@@ -44,73 +52,227 @@ public class MaxVersionPolicy
     implements AfterCreateVersionPolicy
 {
 
-    private Logger          logger = Logger.getLogger(MaxVersionPolicy.class);
+	private Logger logger = Logger.getLogger(MaxVersionPolicy.class);
 
-    private PolicyComponent policyComponent;
-    private VersionService  versionService;
+	private PolicyComponent policyComponent;
+	private VersionService versionService;
+	private NodeService nodeService;
+	private NamespacePrefixResolver namespacePrefixResolver;
 
-    // max number of versions per version node
-    private int             maxVersions;
-
-    private Behaviour       afterCreateVersion;
-
+	// max number of versions per version node
+	private int maxMinorVersions;
+	private int keepIntermediateMinorVersions;
+	private int maxMajorVersions;
+	private int keepIntermediateMajorVersions;
 
     public void setPolicyComponent(PolicyComponent policyComponent)
     {
-        this.policyComponent = policyComponent;
-    }
-
+		this.policyComponent = policyComponent;
+	}
 
     public void setVersionService(VersionService versionService)
     {
-        this.versionService = versionService;
-    }
+		this.versionService = versionService;
+	}
+    
+    public void setNodeService(NodeService nodeService) {
+		this.nodeService = nodeService;
+	}
+    
+    public void setNamespacePrefixResolver(
+			NamespacePrefixResolver namespacePrefixResolver) {
+		this.namespacePrefixResolver = namespacePrefixResolver;
+	}
 
+	public void setMaxMajorVersions(int maxMajorVersions) {
+		this.maxMajorVersions = maxMajorVersions;
+	}
 
-    public void setMaxVersions(int maxVersions)
-    {
-        this.maxVersions = maxVersions;
-    }
+	public void setKeepIntermediateMajorVersions(
+			int keepIntermediateMajorVersions) {
+		this.keepIntermediateMajorVersions = keepIntermediateMajorVersions;
+	}
 
+	public void setMaxMinorVersions(int maxMinorVersions) {
+		this.maxMinorVersions = maxMinorVersions;
+	}
 
-    public void init()
-    {
-        logger.debug("MaxVersions is set to: " + maxVersions);
-        this.afterCreateVersion = new JavaBehaviour(this, "afterCreateVersion", NotificationFrequency.TRANSACTION_COMMIT);
-        this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "afterCreateVersion"), MaxVersionPolicy.class, this.afterCreateVersion);
-    }
+	public void setKeepIntermediateMinorVersions(
+			int keepIntermediateMinorVersions) {
+		this.keepIntermediateMinorVersions = keepIntermediateMinorVersions;
+	}
 
+	public void init() {
+		logger.debug("maxMajorVersions is set to: " + maxMajorVersions);
+		logger.debug("keepIntermediateMajorVersions is set to: "
+				+ keepIntermediateMajorVersions);
+		logger.debug("maxMinorVersions is set to: " + maxMinorVersions);
+		logger.debug("keepIntermediateMinorVersions is set to: "
+				+ keepIntermediateMinorVersions);
+		Behaviour afterCreateVersion = new JavaBehaviour(this,
+				"afterCreateVersion", NotificationFrequency.TRANSACTION_COMMIT);
+		this.policyComponent.bindClassBehaviour(QName.createQName(
+				NamespaceService.ALFRESCO_URI, "afterCreateVersion"),
+				MaxVersionPolicy.class, afterCreateVersion);
 
-    @Override
-    public void afterCreateVersion(NodeRef versionableNode, Version version)
-    {
-        VersionHistory versionHistory = versionService.getVersionHistory(versionableNode);
+		if (keepIntermediateMajorVersions > maxMajorVersions) {
+			logger.warn("keepIntermediateMajorVersions shoud me lesser or equal of maxMajorVersions: maxMajorVersions will be used ("
+					+ maxMajorVersions + ")");
+			keepIntermediateMajorVersions = maxMajorVersions;
+		}
+		if (keepIntermediateMinorVersions > maxMinorVersions) {
+			logger.warn("keepIntermediateMinorVersions shoud me lesser or equal of maxMinorVersions: maxMinorVersions will be used ("
+					+ maxMinorVersions + ")");
+			keepIntermediateMinorVersions = maxMinorVersions;
+		}
+	}
 
-        // If maxVersions is zero, consider policy to be disabled
-        if (maxVersions == 0)
-        {
-            logger.debug("maxVersions is set to zero, consider policy to be disabled");
-            return;
-        }
+	@Override
+	public void afterCreateVersion(NodeRef versionableNode, Version version) {
+		try {
+			doAfterCreateVersion(versionableNode, version);
+		} catch (Throwable e) {
+			// if any error occur: log the error and carry on (we should not
+			// block the creation of a new version just becouse ve fail in
+			// removing older ones)
+			logger.error("An error happen:", e);
+		}
+	}
 
-        if (versionHistory != null)
-        {
-            logger.debug("Current number of versions: " + versionHistory.getAllVersions().size());
-            logger.debug("least recent/root version: " + versionHistory.getRootVersion().getVersionLabel());
+	public void doAfterCreateVersion(NodeRef versionableNode, Version version) {
+		// If maxVersions is zero, consider policy to be disabled
+		if (maxMajorVersions == 0 && maxMinorVersions == 0) {
+			logger.debug("maxMajorVersions and maxMinorVersions is set to zero, consider policy to be disabled");
+			return;
+		}
 
-            // If the current number of versions in the VersionHistory is greater
-            // than the maxVersions limit, remove the root/least recent version
-            // (Remove all version in while cycle since we can have legacy nodes with long history created before the policy was applied.)
-            while (versionHistory.getAllVersions().size() > maxVersions)
-            {
-                logger.debug("Removing Version: " + versionHistory.getRootVersion().getVersionLabel());
-                versionService.deleteVersion(versionableNode, versionHistory.getRootVersion());
-                versionHistory = versionService.getVersionHistory(versionableNode);
-            }
-        }
-        else
-        {
-            logger.debug("versionHistory does not exist");
-        }
-    }
+		VersionHistory versionHistory = versionService
+				.getVersionHistory(versionableNode);
+		if (versionHistory == null) {
+			logger.warn("versionHistory does not exist");
+			return;
+		}
+
+		Collection<Version> versions = versionHistory.getAllVersions();
+		if (versions == null || versions.isEmpty()) {
+			logger.warn("versionHistory.getAllVersions() returned no versions");
+			return;
+		}
+		if (!versions.iterator().next().equals(versionHistory.getHeadVersion())) {
+			throw new IllegalStateException(
+					"The first version returned by versionHistory.getAllVersions() should be the latest.");
+		}
+		
+		if (logger.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			Iterator<Version> it = versions.iterator();
+			while (it.hasNext()) {
+				sb.append(it.next().getVersionLabel());
+				if (it.hasNext()) {
+					sb.append(", ");
+				}
+			}
+			logger.debug("Enforcing max versions for file '"
+					+ nodeService.getPath(versionableNode).toPrefixString(namespacePrefixResolver) + "'("
+					+ versionableNode + "): current versions: ("
+					+ versionHistory.getAllVersions().size() + ")["
+					+ sb.toString() + "]");
+		}
+
+		List<Version> majorVersions = new LinkedList<>();
+		List<Version> minorVersions = new LinkedList<>();
+
+		for (Version v : versions) {
+			if (v == null) {
+				continue;
+			}
+			VersionType type = v.getVersionType();
+			if(type == null) {
+				logger.error("getVersionType() returned null for a version (will be ignored and keept): " + v + "("+v.getVersionLabel()+")");
+				continue;
+			}
+			switch (type) {
+			case MAJOR:
+				majorVersions.add(v);
+				break;
+			case MINOR:
+				minorVersions.add(v);
+				break;
+			default:
+				throw new IllegalStateException(
+						"a version shoul be Major or Minor");
+			}
+		}
+
+		enforceMaxVersions(versionableNode, VersionType.MAJOR, majorVersions,
+				maxMajorVersions, keepIntermediateMajorVersions);
+		enforceMaxVersions(versionableNode, VersionType.MINOR, minorVersions,
+				maxMinorVersions, keepIntermediateMinorVersions);
+	}
+
+	private void enforceMaxVersions(NodeRef versionableNode,
+			VersionType versionType, List<Version> versions, int maxVersions,
+			int keepIntermediateVersions) {
+		if (maxVersions > 0 && versions.size() > maxVersions) {
+			Version toBeRemoved = null;
+
+			while (versions.size() > maxVersions) {
+				if (keepIntermediateVersions <= 0) {
+					// if we do not need to keep intermediate vesions we simply
+					// remove the last one (the older)
+					toBeRemoved = versions.get(versions.size() - 1);
+				} else {
+					// skip the first version (the most recent one) that sould
+					// not be removed
+					// start from the end of the list (the oldest version)
+					ListIterator<Version> it = versions.subList(1,
+							versions.size()).listIterator(versions.size() - 1);
+					// until we found the first version we can remove (scanning
+					// from the oldest to the newest ones)
+					while (it.hasPrevious()) {
+						Version version = it.previous();
+						if (toBeRemoved == null) {
+							// if we dont find another version we can safely
+							// rmove, we remove the last one
+							toBeRemoved = version;
+						}
+						int versionNumber;
+						switch (versionType) {
+						case MAJOR:
+							// the number before the dot (2.3 -> 2)
+							versionNumber = Integer.parseInt(version
+									.getVersionLabel().split("\\.")[0]);
+							break;
+						case MINOR:
+						default:
+							// the number after the dot (2.3 -> 3)
+							versionNumber = Integer.parseInt(version
+									.getVersionLabel().split("\\.")[1]);
+							break;
+						}
+						// if the module is 0 we must try to keep this version
+						if (versionNumber % keepIntermediateVersions == 0) {
+							// this version should be kept, continue to search
+							continue;
+						} else {
+							// this is the first version we can remove safely
+							toBeRemoved = version;
+							break;
+						}
+					}
+				}
+
+				if (toBeRemoved != null) {
+					logger.debug("Removing Version: "
+							+ toBeRemoved.getVersionLabel());
+					versionService.deleteVersion(versionableNode, toBeRemoved);
+					versions.remove(toBeRemoved);
+					toBeRemoved = null;
+				} else {
+					throw new IllegalStateException(
+							"Unable to find a version to be removed");
+				}
+			}
+		}
+	}
 }
