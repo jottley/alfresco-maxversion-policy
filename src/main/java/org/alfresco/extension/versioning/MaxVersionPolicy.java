@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2005-2010 Alfresco Software Limited.
+ * Copyright (C) 2005-2015 Alfresco Software Limited.
  * 
  * This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
@@ -36,7 +36,7 @@ import org.apache.log4j.Logger;
 /**
  * 
  * @author Jared Ottley (jared.ottley@alfresco.com)
- * @version 0.5
+ * @version 0.8
  * 
  */
 
@@ -51,9 +51,6 @@ public class MaxVersionPolicy
 
     // max number of versions per version node
     private int             maxVersions;
-
-    private Behaviour       afterCreateVersion;
-
 
     public void setPolicyComponent(PolicyComponent policyComponent)
     {
@@ -76,8 +73,8 @@ public class MaxVersionPolicy
     public void init()
     {
         logger.debug("MaxVersions is set to: " + maxVersions);
-        this.afterCreateVersion = new JavaBehaviour(this, "afterCreateVersion", NotificationFrequency.TRANSACTION_COMMIT);
-        this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "afterCreateVersion"), MaxVersionPolicy.class, this.afterCreateVersion);
+        Behaviour afterCreateVersionBehaviour = new JavaBehaviour(this, "afterCreateVersion", NotificationFrequency.TRANSACTION_COMMIT);
+        this.policyComponent.bindClassBehaviour(QName.createQName(NamespaceService.ALFRESCO_URI, "afterCreateVersion"), MaxVersionPolicy.class, afterCreateVersionBehaviour);
     }
 
 
