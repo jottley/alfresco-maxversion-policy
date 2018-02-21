@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.alfresco.extension</groupId>
     <artifactId>max-version-policy-${project.version}</artifactId>
-    <version>0.0.9</version>
+    <version>0.0.10</version>
     <packaging>amp</packaging>
 
     <properties>
-        <alfresco.version>5.1.g</alfresco.version>
+        <alfresco.version>5.2.g</alfresco.version>
     </properties>
     
     <parent>
