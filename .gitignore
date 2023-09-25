@@ -7,3 +7,4 @@ atlassian-ide-plugin.xml
 *.iml
 /.idea
 /.sts4-cache
+/.vscode
