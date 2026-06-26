@@ -1,0 +1,69 @@
+# Pre-commit hooks configuration for Alfresco Max Version Policy
+# See https://pre-commit.com for more information
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.properties$'
+      - id: end-of-file-fixer
+        exclude: '\.properties$'
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom YAML tags used in docker-compose
+      - id: check-xml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: detect-private-key
+
+  # Java-specific checks
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-java
+        args: [--autofix, --aosp]  # AOSP style (4 spaces)
+
+  # Maven wrapper validation
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-executables-have-shebangs
+        files: '^(run\.sh|.*\.sh)$'
+
+  # Run unit tests before commit (Java files only)
+  - repo: local
+    hooks:
+      - id: maven-test
+        name: Maven Unit Tests
+        entry: bash -c 'mvn test -pl max-version-policy-platform -q'
+        language: system
+        files: '\.java$'
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # Check for common code quality issues
+  - repo: local
+    hooks:
+      - id: check-wildcard-imports
+        name: Check for wildcard imports
+        entry: bash -c 'if grep -rn "import .*\.\*;" max-version-policy-platform/src/main/java/; then echo "❌ Wildcard imports found. Use explicit imports per project standards."; exit 1; fi'
+        language: system
+        files: '\.java$'
+        pass_filenames: false
+
+      - id: check-system-out
+        name: Check for System.out usage
+        entry: bash -c 'if grep -rn "System\.out\.println" max-version-policy-platform/src/main/java/; then echo "❌ System.out.println found. Use logger instead per project standards."; exit 1; fi'
+        language: system
+        files: '\.java$'
+        pass_filenames: false
+
+      - id: check-copyright-header
+        name: Check copyright headers
+        entry: bash -c 'for f in "$@"; do if ! head -5 "$f" | grep -q "Copyright"; then echo "⚠️  Missing copyright header in $f"; fi; done'
+        language: system
+        files: '^max-version-policy-platform/src/main/java/.*\.java$'
+        pass_filenames: true

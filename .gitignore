@@ -1,4 +1,4 @@
-/target
+*/target/*
 /.settings
 /.classpath
 /.project
@@ -8,3 +8,17 @@ atlassian-ide-plugin.xml
 /.idea
 /.sts4-cache
 /.vscode
+/CLAUDE.md
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor temporary files
+*.swp
+*.swo
+*~
+
+# Maven debug/analysis files
+effective-pom.xml
+dependency-reduced-pom.xml

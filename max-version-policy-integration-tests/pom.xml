@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>max-version-policy-integration-tests</artifactId>
+    <name> Alfresco Max Version Policy Integration Tests Module</name>
+    <description>Integration Tests module for in-container integration testing</description>
+    <packaging>jar</packaging> <!-- Note. this just runs Integration Tests, but it needs to be a JAR otherwise
+                                            nothing is compiled (i.e. you cannot set it to pom) -->
+
+    <parent>
+        <groupId>org.alfresco.extension</groupId>
+        <artifactId>max-version-policy</artifactId>
+        <version>0.0.11-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+    </properties>
+
+    <repositories>
+
+  <repository>
+    <id>alfresco-public</id>
+    <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
+  </repository>
+
+</repositories>
+
+    <dependencies>
+        <!-- Bring in any custom module that should be tested, by default we bring in the Platform JAR module
+             that is generated for the AIO project -->
+        <dependency>
+            <groupId>org.alfresco.extension</groupId>
+            <artifactId>max-version-policy-platform</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Alfresco Java SDK for REST API access -->
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-core-rest-api</artifactId>
+            <version>7.3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-auth-rest-api</artifactId>
+            <version>7.3.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.zeroturnaround</groupId>
+                <artifactId>jrebel-maven-plugin</artifactId>
+                <configuration>
+                    <rebelXmlDirectory>${project.build.testOutputDirectory}</rebelXmlDirectory>
+                </configuration>
+            </plugin>
+
+            <!-- Make sure we attach the tests so we can include them when running -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Runs the integration tests, any class that follows naming convention
+                 "**/IT*.java", "**/*IT.java", and "**/*ITCase.java" will be considered an integration test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <acs.endpoint.path>${test.acs.endpoint.path}</acs.endpoint.path>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
