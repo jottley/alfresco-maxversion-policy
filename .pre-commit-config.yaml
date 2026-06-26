@@ -1,23 +1,10 @@
 # Pre-commit hooks configuration for Alfresco Max Version Policy
 # See https://pre-commit.com for more information
 
-# Configuration for pre-commit.ci (https://pre-commit.ci)
-ci:
-  autofix_commit_msg: |
-    [pre-commit.ci] auto fixes from pre-commit hooks
-
-    for more information, see https://pre-commit.ci
-  autofix_prs: true
-  autoupdate_branch: ''
-  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-  autoupdate_schedule: quarterly
-  skip: [maven-test]  # Skip Maven tests in pre-commit.ci (run in GitHub Actions instead)
-  submodules: false
-
 repos:
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         exclude: '\.properties$'
@@ -34,14 +21,14 @@ repos:
 
   # Java-specific checks
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.14.0
+    rev: v2.16.0
     hooks:
       - id: pretty-format-java
         args: [--autofix, --aosp]  # AOSP style (4 spaces)
 
   # Maven wrapper validation
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-executables-have-shebangs
         files: '^(run\.sh|.*\.sh)$'
