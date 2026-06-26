@@ -1,6 +1,19 @@
 # Pre-commit hooks configuration for Alfresco Max Version Policy
 # See https://pre-commit.com for more information
 
+# Configuration for pre-commit.ci (https://pre-commit.ci)
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: quarterly
+  skip: [maven-test]  # Skip Maven tests in pre-commit.ci (run in GitHub Actions instead)
+  submodules: false
+
 repos:
   # General file checks
   - repo: https://github.com/pre-commit/pre-commit-hooks
