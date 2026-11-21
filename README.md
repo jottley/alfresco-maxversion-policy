@@ -2,8 +2,8 @@
 
 **Author:** Jared Ottley (jared@ottleys.net)
 **Original Date:** February 20, 2018
-**Current Version:** 0.0.10
-**Last Updated:** June 10, 2026
+**Current Version:** 0.0.11
+**Last Updated:** Oct 6, 2026
 
 ## Summary
 
