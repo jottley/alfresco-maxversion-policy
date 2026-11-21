@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.11] - Unreleased
+
 ### Added
 - Pre-commit hooks for code quality enforcement
   - Google Java Format (AOSP style) auto-formatting
@@ -19,9 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD workflow for quality checks
 - EditorConfig for consistent IDE formatting
 - Comprehensive pre-commit documentation in `.github/PRE_COMMIT.md`
-- Comparison guide: Pre-commit vs Maven plugins (`.github/PRE_COMMIT_VS_MAVEN.md`)
+- `.github/GITHUB_ACTIONS_NATIVE_PRECOMMIT.md` describing the native pre-commit CI approach
+- `AGENTS.md` (mirror of `CLAUDE.md` for other coding agents)
+- Unit tests (`MaxVersionPolicyTest`) and integration tests (`MaxVersionPolicyIT`, `RestApiVersioningIT`)
 
 ### Changed
+- GitHub Actions updated to Node.js 24 compatible versions (checkout v7, setup-python v6.3.0, setup-java v5.4.0, upload-artifact v7)
+- CI runs pre-commit natively (`pip install pre-commit`) instead of `pre-commit/action`; pre-commit job uses Java 21, unit tests use Java 17
+- Corrected resource paths and other inaccuracies in README.md
 - Updated `.gitignore` to exclude OS-specific files (.DS_Store, Thumbs.db)
 - Updated `.gitignore` to exclude Maven debug files (effective-pom.xml)
 - Enhanced README.md with pre-commit setup instructions
@@ -58,5 +65,5 @@ See git history for changes in versions prior to 0.0.9.
 ---
 
 **Contributors:**
-- Jared Ottley (jared.ottley@hyland.com) - Original author and maintainer
+- Jared Ottley (jared@ottleys.net) - Original author and maintainer
 - Konst Sergeev ([@ksergeev](https://github.com/ksergeev)) - Enhanced version cleanup for legacy nodes, added ability to disable policy

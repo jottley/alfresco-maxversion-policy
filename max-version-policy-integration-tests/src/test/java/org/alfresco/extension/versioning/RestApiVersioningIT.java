@@ -52,7 +52,7 @@ import java.util.Properties;
  * Standalone integration test using REST API to verify versioning behavior. This test does not use
  * AlfrescoTestRunner and makes direct REST API calls.
  *
- * @author Jared Ottley (jared.ottley@hyland.com)
+ * @author Jared Ottley (jared@ottleys.net)
  */
 public class RestApiVersioningIT {
 

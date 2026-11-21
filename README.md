@@ -2,7 +2,7 @@
 
 **Author:** Jared Ottley (jared@ottleys.net)
 **Original Date:** February 20, 2018
-**Current Version:** 0.0.11
+**Current Version:** 0.0.11 (latest release: 0.0.10)
 **Last Updated:** Oct 6, 2026
 
 ## Summary
@@ -32,7 +32,7 @@ Alfresco Max Version Policy is delivered as an AMP (Alfresco Module Package).
 
 **Requirements:**
 - **Minimum Alfresco Version:** 23.1.0
-- **Java:** 11 or 17
+- **Java:** Built with Java 11 or 17 (Maven `java11` / `java17` profiles)
 
 ## Configuration
 
@@ -46,6 +46,7 @@ maxVersions=10
 
 - **Default value:** 10
 - **To disable the policy:** Set `maxVersions=0`
+- **Where to set it:** The packaged default is in the module's `alfresco-global.properties`; override it in your deployed Alfresco instance's `alfresco-global.properties`
 - **After changing:** Restart Alfresco
 
 ### Logging Configuration
@@ -65,6 +66,7 @@ logger.alfresco-extension-maxversionpolicy.level=INFO
 ```
 INFO [extension.versioning.MaxVersionPolicy] MaxVersions is set to: 10
 INFO [extension.versioning.MaxVersionPolicy] Current number of versions: 11
+INFO [extension.versioning.MaxVersionPolicy] least recent/root version: 1.0
 INFO [extension.versioning.MaxVersionPolicy] Max Version Policy - Removing Version: 1.0
 ```
 
@@ -89,7 +91,7 @@ pre-commit install
 
 Hooks will run automatically on commit and check:
 - Java code formatting (Google Java Format)
-- Unit tests on changed files
+- Unit tests (`mvn test -pl max-version-policy-platform`, run when `.java` files change)
 - Wildcard imports (blocked per project standards)
 - Trailing whitespace, line endings, file formatting
 - Copyright headers

@@ -51,7 +51,7 @@ import org.apache.commons.logging.LogFactory;
  * <p>Configuration is done via Spring bean injection in {@code module-context.xml}. The default
  * limit is set in {@code alfresco-global.properties} using the {@code maxVersions} property.
  *
- * @author Jared Ottley (jared.ottley@hyland.com)
+ * @author Jared Ottley (jared@ottleys.net)
  * @version 1.0-SNAPSHOT
  * @see AfterCreateVersionPolicy
  */

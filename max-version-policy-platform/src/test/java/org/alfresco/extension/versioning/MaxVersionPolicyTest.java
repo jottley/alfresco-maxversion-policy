@@ -46,7 +46,7 @@ import java.util.Collection;
 /**
  * Unit tests for MaxVersionPolicy
  *
- * @author Jared Ottley (jared.ottley@hyland.com)
+ * @author Jared Ottley (jared@ottleys.net)
  */
 @RunWith(MockitoJUnitRunner.class)
 public class MaxVersionPolicyTest {

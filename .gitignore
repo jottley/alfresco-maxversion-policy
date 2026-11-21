@@ -9,6 +9,7 @@ atlassian-ide-plugin.xml
 /.sts4-cache
 /.vscode
 /CLAUDE.md
+/AGENTS.md
 
 # OS-specific files
 .DS_Store

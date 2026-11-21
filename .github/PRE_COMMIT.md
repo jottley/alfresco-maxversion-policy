@@ -129,11 +129,6 @@ pre-commit run --all-files  # Test the changes
 
 ## CI/CD Integration
 
-Consider adding pre-commit to CI/CD:
-
-```yaml
-# Example GitHub Actions workflow
-- uses: pre-commit/action@v3.0.0
-```
+Pre-commit already runs in CI (see `.github/workflows/ci.yml` and [GITHUB_ACTIONS_NATIVE_PRECOMMIT.md](GITHUB_ACTIONS_NATIVE_PRECOMMIT.md)) via `pip install pre-commit` and `pre-commit run --all-files`.
 
 This ensures all commits meet quality standards, even if developers bypass local hooks.

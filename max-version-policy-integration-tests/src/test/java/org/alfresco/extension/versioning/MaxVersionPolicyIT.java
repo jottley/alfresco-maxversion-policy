@@ -41,7 +41,7 @@ import java.util.Map;
  * Integration tests for MaxVersionPolicy Tests the version policy behavior against a running
  * Alfresco instance
  *
- * @author Jared Ottley (jared.ottley@hyland.com)
+ * @author Jared Ottley (jared@ottleys.net)
  */
 @RunWith(value = AlfrescoTestRunner.class)
 public class MaxVersionPolicyIT extends AbstractAlfrescoIT {
